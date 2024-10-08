@@ -1,0 +1,104 @@
+class NodoCriatura:
+    def __init__(self, nombre, derrotado_por=None, descripcion=None, capturada=None):
+        self.nombre = nombre
+        self.derrotado_por = derrotado_por
+        self.descripcion = descripcion
+        self.capturada = capturada
+        self.izquierdo = None
+        self.derecho = None
+
+    def __repr__(self):
+        return f"Criatura: {self.nombre}, Derrotado por: {self.derrotado_por}, Capturada: {self.capturada}, Descripción: {self.descripcion}"
+
+
+class ArbolCriaturas:
+    def __init__(self):
+        self.raiz = None
+
+    def agregar_nodo(self, nombre, derrotado_por=None, descripcion=None, capturada=None):
+        nuevo_nodo = NodoCriatura(nombre, derrotado_por, descripcion, capturada)
+        if self.raiz is None:
+            self.raiz = nuevo_nodo
+        else:
+            self._agregar(self.raiz, nuevo_nodo)
+
+    def _agregar(self, nodo_actual, nuevo_nodo):
+        if nuevo_nodo.nombre < nodo_actual.nombre:
+            if nodo_actual.izquierdo is None:
+                nodo_actual.izquierdo = nuevo_nodo
+            else:
+                self._agregar(nodo_actual.izquierdo, nuevo_nodo)
+        else:
+            if nodo_actual.derecho is None:
+                nodo_actual.derecho = nuevo_nodo
+            else:
+                self._agregar(nodo_actual.derecho, nuevo_nodo)
+
+    def buscar_nodo(self, nodo, nombre):
+        if nodo is None or nodo.nombre == nombre:
+            return nodo
+        if nombre < nodo.nombre:
+            return self.buscar_nodo(nodo.izquierdo, nombre)
+        return self.buscar_nodo(nodo.derecho, nombre)
+
+    def agregar_descripcion(self, nombre, descripcion):
+        nodo = self.buscar_nodo(self.raiz, nombre)
+        if nodo:
+            nodo.descripcion = descripcion
+            print(f"Descripción agregada a {nombre}: {descripcion}")
+        else:
+            print(f"Criatura {nombre} no encontrada.")
+
+    def mostrar_info_criatura(self, nombre):
+        nodo = self.buscar_nodo(self.raiz, nombre)
+        if nodo:
+            print(nodo)
+        else:
+            print(f"Criatura {nombre} no encontrada.")
+
+    def listado_inorden(self, nodo):
+        if nodo is not None:
+            self.listado_inorden(nodo.izquierdo)
+            print(f"Criatura: {nodo.nombre}, Derrotado por: {nodo.derrotado_por}")
+            self.listado_inorden(nodo.derecho)
+
+    def top_heroes(self):
+        from collections import Counter
+        contador = Counter()
+        self._contar_derrotas(self.raiz, contador)
+        top_3 = contador.most_common(3)
+        print("Top 3 héroes/dioses que derrotaron más criaturas:")
+        for heroe, cantidad in top_3:
+            print(f"{heroe}: {cantidad} criaturas")
+
+    def _contar_derrotas(self, nodo, contador):
+        if nodo is not None:
+            if nodo.derrotado_por:
+                contador[nodo.derrotado_por] += 1
+            self._contar_derrotas(nodo.izquierdo, contador)
+            self._contar_derrotas(nodo.derecho, contador)
+
+
+arbol = ArbolCriaturas()
+
+# Agregar criaturas
+arbol.agregar_nodo("Talos", "Medea")
+arbol.agregar_nodo("Hidra de Lerna", "Heracles")
+arbol.agregar_nodo("León de Nemea", "Heracles")
+arbol.agregar_nodo("Medusa", "Perseo")
+arbol.agregar_nodo("Esfinge", "Edipo")
+
+# Cargar descripciones
+arbol.agregar_descripcion("Talos", "Un gigante de bronce.")
+arbol.agregar_descripcion("Hidra de Lerna", "Una serpiente con múltiples cabezas.")
+
+# Mostrar información de Talos
+arbol.mostrar_info_criatura("Talos")
+
+# Listado inorden de las criaturas
+print("\nListado inorden:")
+arbol.listado_inorden(arbol.raiz)
+
+# Determinar los 3 héroes que derrotaron mayor cantidad de criaturas
+print("\nTop héroes que derrotaron más criaturas:")
+arbol.top_heroes()
