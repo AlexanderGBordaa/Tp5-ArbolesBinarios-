@@ -1,0 +1,126 @@
+from collections import deque  # Usamos deque en lugar de Queue para simplicidad
+
+class Nodo:
+    def __init__(self, nombre, es_heroe):
+        self.nombre = nombre
+        self.es_heroe = es_heroe
+        self.izquierdo = None
+        self.derecho = None
+
+class ArbolBinario:
+    def __init__(self):
+        self.raiz = None
+        
+    def Insertar(self, nombre, es_heroe):
+        nuevo_nodo = Nodo(nombre, es_heroe)
+        if self.raiz is None:
+            self.raiz = nuevo_nodo
+        else:
+            self._insertar(self.raiz, nuevo_nodo)
+    
+    def _insertar(self, nodo_actual, nuevo_nodo):
+        if nuevo_nodo.nombre < nodo_actual.nombre:
+            if nodo_actual.izquierdo is None:
+                nodo_actual.izquierdo = nuevo_nodo
+            else:
+                self._insertar(nodo_actual.izquierdo, nuevo_nodo)  
+        else:
+            if nodo_actual.derecho is None:
+                nodo_actual.derecho = nuevo_nodo
+            else:
+                self._insertar(nodo_actual.derecho, nuevo_nodo)
+                
+    def inorden(self):
+        elementos = []
+        self._inorden(self.raiz, elementos)
+        return elementos
+    
+    def _inorden(self, nodo, elementos):
+        if nodo is not None:
+            self._inorden(nodo.izquierdo, elementos)
+            elementos.append(nodo)
+            self._inorden(nodo.derecho, elementos)
+    
+    def listar_villanos(self):
+        villanos = [nodo.nombre for nodo in self.inorden() if not nodo.es_heroe]
+        return sorted(villanos)
+    
+    def listarheroes_con_c(self):
+        heroes_con_c = [nodo.nombre for nodo in self.inorden() if nodo.es_heroe and nodo.nombre.startswith('C')]
+        return heroes_con_c
+    
+    def contar_heroes(self):
+        return sum(1 for nodo in self.inorden() if nodo.es_heroe)
+    
+    def modificar_doctor_strange(self, nuevo_nombre):
+        nodo_encontrado = self._buscar_por_proximidad(self.raiz, "Doctor Strange")
+        if nodo_encontrado:
+            nodo_encontrado.nombre = nuevo_nombre
+    
+    def _buscar_por_proximidad(self, nodo_actual, nombre):
+        if nodo_actual is None:
+            return None
+        if nombre.lower() in nodo_actual.nombre.lower():
+            return nodo_actual
+        elif nombre < nodo_actual.nombre:
+            return self._buscar_por_proximidad(nodo_actual.izquierdo, nombre)
+        else:
+            return self._buscar_por_proximidad(nodo_actual.derecho, nombre)
+    
+    def listar_heroes_descendente(self):
+        heroes = [nodo.nombre for nodo in self.inorden() if nodo.es_heroe]
+        return sorted(heroes, reverse=True)
+    
+    def generar_bosque(self):
+        arbol_heroes = ArbolBinario()
+        arbol_villanos = ArbolBinario()
+        
+        for nodo in self.inorden():
+            if nodo.es_heroe:
+                arbol_heroes.Insertar(nodo.nombre, nodo.es_heroe)
+            else:
+                arbol_villanos.Insertar(nodo.nombre, nodo.es_heroe)
+        
+        return arbol_villanos, arbol_heroes
+    
+    def contar_nodos(self):
+        return len(self.inorden())
+    
+    def barrido_ordenado(self):
+        return [nodo.nombre for nodo in self.inorden()]
+
+# Crear árbol
+arbol = ArbolBinario()
+
+# Insertar nodos en el árbol
+arbol.Insertar('Iron Man', True)
+arbol.Insertar('Spider Man', False)
+arbol.Insertar('Capitan America', True)
+arbol.Insertar('Loki', False)
+arbol.Insertar('Doctor Strange', True)
+
+# Listar villanos
+print(arbol.listar_villanos())
+
+# Listar héroes cuyo nombre empieza con 'C'
+print(arbol.listarheroes_con_c())
+
+# Contar héroes
+print(arbol.contar_heroes())
+
+# Modificar nombre de "Doctor Strange"
+arbol.modificar_doctor_strange('Dr. Strange')
+
+# Listar héroes en orden descendente
+print(arbol.listar_heroes_descendente())
+
+# Generar bosque de héroes y villanos
+arbol_heroes, arbol_villanos = arbol.generar_bosque()
+
+# Contar nodos en cada bosque
+print(arbol_heroes.contar_nodos())
+print(arbol_villanos.contar_nodos())
+
+# Barrido ordenado de héroes y villanos
+print(arbol_heroes.barrido_ordenado())
+print(arbol_villanos.barrido_ordenado())
